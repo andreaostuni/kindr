@@ -33,7 +33,8 @@
 #include "kindr/common/assert_macros_eigen.hpp"
 #include "kindr/quaternions/QuaternionBase.hpp"
 
-namespace kindr {
+namespace kindr
+{
 
 
 template<typename PrimType_>
@@ -52,22 +53,25 @@ class UnitQuaternion;
  * \see rm::rotations::RotationQuaternion for quaternions that represent a rotation
  */
 template<typename PrimType_>
-class Quaternion : public QuaternionBase<Quaternion<PrimType_>>, public Eigen::Quaternion<PrimType_> {
- private:
+class Quaternion : public QuaternionBase<Quaternion<PrimType_>>, public Eigen::Quaternion<PrimType_>
+{
+private:
   typedef Eigen::Quaternion<PrimType_> Base;
- public:
+
+public:
   //! the implementation type, i.e., Eigen::Quaternion<>
   typedef Base Implementation;
   //! the scalar type, i.e., the type of the coefficients
   typedef PrimType_ Scalar;
   //! the imaginary type, i.e., Eigen::Quaternion<>
-  typedef Eigen::Matrix<PrimType_,3,1> Imaginary;
+  typedef Eigen::Matrix<PrimType_, 3, 1> Imaginary;
   //! quaternion as 4x1 matrix: [w; x; y; z]
-  typedef Eigen::Matrix<PrimType_,4,1> Vector4;
+  typedef Eigen::Matrix<PrimType_, 4, 1> Vector4;
 
   //! Default constructor creates a quaternion with all coefficients equal to zero
   Quaternion()
-    : Base(Implementation(0,0,0,0)) {
+  : Base(Implementation(0, 0, 0, 0))
+  {
   }
 
   /*! \brief Constructor using four scalars.
@@ -77,58 +81,67 @@ class Quaternion : public QuaternionBase<Quaternion<PrimType_>>, public Eigen::Q
    *  \param z     fourth entry of the quaternion
    */
   Quaternion(Scalar w, Scalar x, Scalar y, Scalar z)
-    : Base(w,x,y,z) {
+  : Base(w, x, y, z)
+  {
   }
 
   /*! \brief Constructor using real and imaginary part.
    *  \param real   real part (PrimType_)
    *  \param imag   imaginary part (Eigen::Matrix<PrimType_,3,1>)
    */
-  Quaternion(Scalar real, const Imaginary& imag)
-    : Base(real,imag(0),imag(1),imag(2)) {
+  Quaternion(Scalar real, const Imaginary & imag)
+  : Base(real, imag(0), imag(1), imag(2))
+  {
   }
 
   /*! \brief Constructor using Eigen::Matrix<PrimType_,4,1>.
    *  \param other   Eigen::Matrix<PrimType_,4,1>
    */
-  Quaternion(const Vector4& vector4)
-    : Base(vector4(0),vector4(1),vector4(2),vector4(3)) {
+  Quaternion(const Vector4 & vector4)
+  : Base(vector4(0), vector4(1), vector4(2), vector4(3))
+  {
   }
 
   // create from Eigen::Quaternion
-  explicit Quaternion(const Base& other)
-    : Base(other) {
+  explicit Quaternion(const Base & other)
+  : Base(other)
+  {
   }
 
   /*! \returns the inverse of the quaternion
     */
-  Quaternion inverted() const {
+  Quaternion inverted() const
+  {
     return Quaternion(Implementation::inverse());
   }
 
   /*! \inverts the quaternion
     */
-  Quaternion& invert() {
+  Quaternion & invert()
+  {
     *this = Quaternion(Implementation::inverse());
     return *this;
   }
 
   /*! \returns the conjugate of the quaternion
     */
-  Quaternion conjugated() const {
+  Quaternion conjugated() const
+  {
     return Quaternion(Implementation::conjugate());
   }
 
   /*! \conjugates the quaternion
     */
-  Quaternion& conjugate() {
+  Quaternion & conjugate()
+  {
     *this = Quaternion(Implementation::conjugate());
     return *this;
   }
 
-  Quaternion& operator =(const Quaternion<PrimType_>& other) = default;
+  Quaternion & operator=(const Quaternion<PrimType_> & other) = default;
 
-  Quaternion& operator =(const UnitQuaternion<PrimType_>& other) {
+  Quaternion & operator=(const UnitQuaternion<PrimType_> & other)
+  {
     *this = Quaternion(other.toImplementation());
     return *this;
   }
@@ -138,95 +151,115 @@ class Quaternion : public QuaternionBase<Quaternion<PrimType_>>, public Eigen::Q
 //  }
 
   template<typename PrimTypeIn_>
-  Quaternion& operator ()(const Quaternion<PrimTypeIn_>& other) {
+  Quaternion & operator()(const Quaternion<PrimTypeIn_> & other)
+  {
 //	*this = other.template cast<PrimType_>();
-	this->w() = static_cast<PrimType_>(other.w());
-	this->x() = static_cast<PrimType_>(other.x());
-	this->y() = static_cast<PrimType_>(other.y());
-	this->z() = static_cast<PrimType_>(other.z());
-	return *this;
+    this->w() = static_cast<PrimType_>(other.w());
+    this->x() = static_cast<PrimType_>(other.x());
+    this->y() = static_cast<PrimType_>(other.y());
+    this->z() = static_cast<PrimType_>(other.z());
+    return *this;
   }
 
   template<typename PrimTypeIn_>
-  Quaternion& operator ()(const UnitQuaternion<PrimTypeIn_>& other) {
+  Quaternion & operator()(const UnitQuaternion<PrimTypeIn_> & other)
+  {
 //	*this = other.uq.template cast<PrimType_>(); // uq is private
-	this->w() = static_cast<PrimType_>(other.w());
-	this->x() = static_cast<PrimType_>(other.x());
-	this->y() = static_cast<PrimType_>(other.y());
-	this->z() = static_cast<PrimType_>(other.z());
-	return *this;
+    this->w() = static_cast<PrimType_>(other.w());
+    this->x() = static_cast<PrimType_>(other.x());
+    this->y() = static_cast<PrimType_>(other.y());
+    this->z() = static_cast<PrimType_>(other.z());
+    return *this;
   }
 
-  inline Implementation& toImplementation() {
-    return static_cast<Implementation&>(*this);
+  inline Implementation & toImplementation()
+  {
+    return static_cast<Implementation &>(*this);
   }
-  inline const Implementation& toImplementation() const {
-    return static_cast<const Implementation&>(*this);
+  inline const Implementation & toImplementation() const
+  {
+    return static_cast<const Implementation &>(*this);
   }
 
   using QuaternionBase<Quaternion<PrimType_>>::operator==;
+  using QuaternionBase<Quaternion<PrimType_>>::operator!=;
   using QuaternionBase<Quaternion<PrimType_>>::operator*;
 
-  inline Scalar w() const {
+  inline Scalar w() const
+  {
     return Base::w();
   }
 
-  inline Scalar x() const {
+  inline Scalar x() const
+  {
     return Base::x();
   }
 
-  inline Scalar y() const {
+  inline Scalar y() const
+  {
     return Base::y();
   }
 
-  inline Scalar z() const {
+  inline Scalar z() const
+  {
     return Base::z();
   }
 
-  inline Scalar& w() { // todo: attention: no assertion for unitquaternions!
+  inline Scalar & w()  // todo: attention: no assertion for unitquaternions!
+  {
     return Base::w();
   }
 
-  inline Scalar& x() {
+  inline Scalar & x()
+  {
     return Base::x();
   }
 
-  inline Scalar& y() {
+  inline Scalar & y()
+  {
     return Base::y();
   }
 
-  inline Scalar& z() {
+  inline Scalar & z()
+  {
     return Base::z();
   }
 
-  inline Scalar real() const {
+  inline Scalar real() const
+  {
     return Base::w();
   }
 
-  inline Imaginary imaginary() const {
-    return Imaginary(Base::x(),Base::y(),Base::z());
+  inline Imaginary imaginary() const
+  {
+    return Imaginary(Base::x(), Base::y(), Base::z());
   }
 
-  inline Vector4 vector() const {
+  inline Vector4 vector() const
+  {
     Vector4 vector4;
     vector4 << w(), x(), y(), z();
     return vector4;
   }
 
-  inline Scalar norm() const {
+  inline Scalar norm() const
+  {
     return Base::norm();
   }
 
-  Quaternion normalized() const {
+  Quaternion normalized() const
+  {
     return Quaternion(this->Base::normalized());
   }
 
-  Quaternion& normalize() {
-	  this->Base::normalize();
-	  return *this;
+  Quaternion & normalize()
+  {
+    this->Base::normalize();
+    return *this;
   }
 
-  Quaternion& setZero() {
+  Quaternion & setZero()
+  {
     this->w() = Scalar(0.0);
     this->x() = Scalar(0.0);
     this->y() = Scalar(0.0);
@@ -237,11 +270,13 @@ class Quaternion : public QuaternionBase<Quaternion<PrimType_>>, public Eigen::Q
   /*! \brief Get zero element.
    *  \returns zero element
    */
-  static Quaternion Zero() {
+  static Quaternion Zero()
+  {
     return Quaternion();
   }
 
-  UnitQuaternion<PrimType_> toUnitQuaternion() const {
+  UnitQuaternion<PrimType_> toUnitQuaternion() const
+  {
     return UnitQuaternion<PrimType_>(this->Base::normalized());
   }
 
@@ -249,12 +284,13 @@ class Quaternion : public QuaternionBase<Quaternion<PrimType_>>, public Eigen::Q
    *  This function can be used to get the derivative of the concatenation with respect to the right quaternion.
    *  \returns the quaternion matrix Qleft
    */
-  Eigen::Matrix<PrimType_,4,4> getQuaternionMatrix() {
-    Eigen::Matrix<PrimType_,4,4> Qleft;
-    Qleft(0,0) =  w();      Qleft(0,1) = -x();      Qleft(0,2) = -y();      Qleft(0,3) = -z();
-    Qleft(1,0) =  x();      Qleft(1,1) =  w();      Qleft(1,2) = -z();      Qleft(1,3) =  y();
-    Qleft(2,0) =  y();      Qleft(2,1) =  z();      Qleft(2,2) =  w();      Qleft(2,3) = -x();
-    Qleft(3,0) =  z();      Qleft(3,1) = -y();      Qleft(3,2) =  x();      Qleft(3,3) =  w();
+  Eigen::Matrix<PrimType_, 4, 4> getQuaternionMatrix()
+  {
+    Eigen::Matrix<PrimType_, 4, 4> Qleft;
+    Qleft(0, 0) = w();      Qleft(0, 1) = -x();      Qleft(0, 2) = -y();      Qleft(0, 3) = -z();
+    Qleft(1, 0) = x();      Qleft(1, 1) = w();      Qleft(1, 2) = -z();      Qleft(1, 3) = y();
+    Qleft(2, 0) = y();      Qleft(2, 1) = z();      Qleft(2, 2) = w();      Qleft(2, 3) = -x();
+    Qleft(3, 0) = z();      Qleft(3, 1) = -y();      Qleft(3, 2) = x();      Qleft(3, 3) = w();
     return Qleft;
   }
 
@@ -262,12 +298,14 @@ class Quaternion : public QuaternionBase<Quaternion<PrimType_>>, public Eigen::Q
    *  This function can be used to get the derivative of the concatenation with respect to the left quaternion.
    *  \returns the quaternion matrix Qright
    */
-  Eigen::Matrix<PrimType_,4,4> getConjugateQuaternionMatrix() {
-    Eigen::Matrix<PrimType_,4,4> Qright;
-    Qright(0,0) =  w();      Qright(0,1) = -x();      Qright(0,2) = -y();      Qright(0,3) = -z();
-    Qright(1,0) =  x();      Qright(1,1) =  w();      Qright(1,2) =  z();      Qright(1,3) = -y();
-    Qright(2,0) =  y();      Qright(2,1) = -z();      Qright(2,2) =  w();      Qright(2,3) =  x();
-    Qright(3,0) =  z();      Qright(3,1) =  y();      Qright(3,2) = -x();      Qright(3,3) =  w();
+  Eigen::Matrix<PrimType_, 4, 4> getConjugateQuaternionMatrix()
+  {
+    Eigen::Matrix<PrimType_, 4, 4> Qright;
+    Qright(0, 0) = w();      Qright(0, 1) = -x();      Qright(0, 2) = -y();
+    Qright(0, 3) = -z();
+    Qright(1, 0) = x();      Qright(1, 1) = w();      Qright(1, 2) = z();      Qright(1, 3) = -y();
+    Qright(2, 0) = y();      Qright(2, 1) = -z();      Qright(2, 2) = w();      Qright(2, 3) = x();
+    Qright(3, 0) = z();      Qright(3, 1) = y();      Qright(3, 2) = -x();      Qright(3, 3) = w();
     return Qright;
   }
 };
@@ -289,23 +327,26 @@ typedef Quaternion<float> QuaternionF;
  * \see rm::rotations::RotationQuaternion for quaternions that represent a rotation
  */
 template<typename PrimType_>
-class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
- private:
+class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>>
+{
+private:
   Quaternion<PrimType_> unitQuternion_;
   typedef UnitQuaternionBase<UnitQuaternion<PrimType_>> Base;
- public:
+
+public:
   //! the implementation type, i.e., Eigen::Quaternion<>
   typedef typename Quaternion<PrimType_>::Implementation Implementation;
   //! the scalar type, i.e., the type of the coefficients
   typedef PrimType_ Scalar;
   //! the imaginary type, i.e., Eigen::Quaternion<>
-  typedef Eigen::Matrix<PrimType_,3,1> Imaginary;
+  typedef Eigen::Matrix<PrimType_, 3, 1> Imaginary;
   //! quaternion as 4x1 matrix: [w; x; y; z]
-  typedef Eigen::Matrix<PrimType_,4,1> Vector4;
+  typedef Eigen::Matrix<PrimType_, 4, 1> Vector4;
 
   //! Default Constructor initializes the unit quaternion to identity
   UnitQuaternion()
-    : unitQuternion_(Implementation::Identity()) {
+  : unitQuternion_(Implementation::Identity())
+  {
   }
 
   //! Constructor to create unit quaternion from coefficients
@@ -316,8 +357,11 @@ class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
    * \param   z   vector index 3
    */
   UnitQuaternion(Scalar w, Scalar x, Scalar y, Scalar z)
-    : unitQuternion_(w,x,y,z) {
-    KINDR_ASSERT_SCALAR_NEAR_DBG(std::runtime_error, norm(), static_cast<Scalar>(1.0), static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
+  : unitQuternion_(w, x, y, z)
+  {
+    KINDR_ASSERT_SCALAR_NEAR_DBG(
+      std::runtime_error, norm(), static_cast<Scalar>(1.0),
+      static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
   }
 
   /*! \brief Constructor using real and imaginary part.
@@ -325,57 +369,73 @@ class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
    *  \param real   real part (PrimType_)
    *  \param imag   imaginary part (Eigen::Matrix<PrimType_,3,1>)
    */
-  UnitQuaternion(Scalar real, const Imaginary& imag)
-    : unitQuternion_(real,imag) {
-    KINDR_ASSERT_SCALAR_NEAR_DBG(std::runtime_error, norm(), static_cast<Scalar>(1.0), static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
+  UnitQuaternion(Scalar real, const Imaginary & imag)
+  : unitQuternion_(real, imag)
+  {
+    KINDR_ASSERT_SCALAR_NEAR_DBG(
+      std::runtime_error, norm(), static_cast<Scalar>(1.0),
+      static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
   }
 
   /*! \brief Constructor using Eigen::Matrix<PrimType_,4,1>.
    *  In debug mode, an assertion is thrown if the quaternion has not unit length.
    *  \param other   Eigen::Matrix<PrimType_,4,1>
    */
-  UnitQuaternion(const Vector4& vector4)
-    : unitQuternion_(vector4(0),vector4(1),vector4(2),vector4(3)) {
-    KINDR_ASSERT_SCALAR_NEAR_DBG(std::runtime_error, norm(), static_cast<Scalar>(1.0), static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
+  UnitQuaternion(const Vector4 & vector4)
+  : unitQuternion_(vector4(0), vector4(1), vector4(2), vector4(3))
+  {
+    KINDR_ASSERT_SCALAR_NEAR_DBG(
+      std::runtime_error, norm(), static_cast<Scalar>(1.0),
+      static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
   }
 
   //! Constructor to create unit quaternion from Quaternion
-  explicit UnitQuaternion(const Quaternion<PrimType_>& other)
-    : unitQuternion_(other.toImplementation()) {
-    KINDR_ASSERT_SCALAR_NEAR_DBG(std::runtime_error, norm(), static_cast<Scalar>(1.0), static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
+  explicit UnitQuaternion(const Quaternion<PrimType_> & other)
+  : unitQuternion_(other.toImplementation())
+  {
+    KINDR_ASSERT_SCALAR_NEAR_DBG(
+      std::runtime_error, norm(), static_cast<Scalar>(1.0),
+      static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
   }
 
   //! Constructor to create unit quaternion from Eigen::Quaternion
   /*!
    * \param other Eigen::Quaternion
    */
-  explicit UnitQuaternion(const Implementation& other)
-    : unitQuternion_(other) {
-    KINDR_ASSERT_SCALAR_NEAR_DBG(std::runtime_error, norm(), static_cast<Scalar>(1.0), static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
+  explicit UnitQuaternion(const Implementation & other)
+  : unitQuternion_(other)
+  {
+    KINDR_ASSERT_SCALAR_NEAR_DBG(
+      std::runtime_error, norm(), static_cast<Scalar>(1.0),
+      static_cast<Scalar>(1e-2), "Input quaternion has not unit length.");
   }
 
-  UnitQuaternion& operator =(const UnitQuaternion<PrimType_>& other) = default;
+  UnitQuaternion & operator=(const UnitQuaternion<PrimType_> & other) = default;
 
   template<typename PrimTypeIn_>
-  UnitQuaternion& operator ()(const UnitQuaternion<PrimTypeIn_>& other) {
+  UnitQuaternion & operator()(const UnitQuaternion<PrimTypeIn_> & other)
+  {
 //	uq = other.uq;
-	this->w() = static_cast<PrimType_>(other.w());
-	this->x() = static_cast<PrimType_>(other.x());
-	this->y() = static_cast<PrimType_>(other.y());
-	this->z() = static_cast<PrimType_>(other.z());
-	return *this;
+    this->w() = static_cast<PrimType_>(other.w());
+    this->x() = static_cast<PrimType_>(other.x());
+    this->y() = static_cast<PrimType_>(other.y());
+    this->z() = static_cast<PrimType_>(other.z());
+    return *this;
   }
 
   template<typename PrimTypeIn_>
-  UnitQuaternion& operator ()(const Quaternion<PrimTypeIn_>& other) {
+  UnitQuaternion & operator()(const Quaternion<PrimTypeIn_> & other)
+  {
 //		*this = (UnitQuaternion)quat;
 //	uq = other.template cast<PrimType_>();
-	this->w() = static_cast<PrimType_>(other.w());
-	this->x() = static_cast<PrimType_>(other.x());
-	this->y() = static_cast<PrimType_>(other.y());
-	this->z() = static_cast<PrimType_>(other.z());
-    KINDR_ASSERT_SCALAR_NEAR_DBG(std::runtime_error, norm(), static_cast<Scalar>(1.0), 1e-2, "Input quaternion has not unit length.");
-	return *this;
+    this->w() = static_cast<PrimType_>(other.w());
+    this->x() = static_cast<PrimType_>(other.x());
+    this->y() = static_cast<PrimType_>(other.y());
+    this->z() = static_cast<PrimType_>(other.z());
+    KINDR_ASSERT_SCALAR_NEAR_DBG(
+      std::runtime_error,
+      norm(), static_cast<Scalar>(1.0), 1e-2, "Input quaternion has not unit length.");
+    return *this;
   }
 
 //  UnitQuaternion<PrimType_> operator *(const UnitQuaternion<PrimType_>& other) {
@@ -393,47 +453,58 @@ class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
 //	  return this->uq == other.uq;
 //  }
 
-  inline Scalar w() const {
+  inline Scalar w() const
+  {
     return unitQuternion_.w();
   }
 
-  inline Scalar x() const {
+  inline Scalar x() const
+  {
     return unitQuternion_.x();
   }
 
-  inline Scalar y() const {
+  inline Scalar y() const
+  {
     return unitQuternion_.y();
   }
 
-  inline Scalar z() const {
+  inline Scalar z() const
+  {
     return unitQuternion_.z();
   }
 
-  inline Scalar& w() { // todo: attention: no assertion for unitquaternions!
+  inline Scalar & w()  // todo: attention: no assertion for unitquaternions!
+  {
     return unitQuternion_.w();
   }
 
-  inline Scalar& x() {
+  inline Scalar & x()
+  {
     return unitQuternion_.x();
   }
 
-  inline Scalar& y() {
+  inline Scalar & y()
+  {
     return unitQuternion_.y();
   }
 
-  inline Scalar& z() {
+  inline Scalar & z()
+  {
     return unitQuternion_.z();
   }
 
-  inline Scalar real() const {
+  inline Scalar real() const
+  {
     return unitQuternion_.w();
   }
 
-  inline Imaginary imaginary() const {
-    return Imaginary(unitQuternion_.x(),unitQuternion_.y(),unitQuternion_.z());
+  inline Imaginary imaginary() const
+  {
+    return Imaginary(unitQuternion_.x(), unitQuternion_.y(), unitQuternion_.z());
   }
 
-  inline Vector4 vector() const {
+  inline Vector4 vector() const
+  {
     Vector4 vector4;
     vector4 << w(), x(), y(), z();
     return vector4;
@@ -445,13 +516,15 @@ class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
 
   /*! \returns the conjugate of the quaternion
     */
-  UnitQuaternion conjugated() const {
+  UnitQuaternion conjugated() const
+  {
     return UnitQuaternion(unitQuternion_.conjugated());
   }
 
   /*! \conjugates the quaternion
     */
-  UnitQuaternion& conjugate() {
+  UnitQuaternion & conjugate()
+  {
     unitQuternion_.conjugate();
     return *this;
   }
@@ -465,14 +538,16 @@ class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
 //    return UnitQuaternion(Base::conjugate());
 //  }
 
-  Scalar norm() const {
+  Scalar norm() const
+  {
     return unitQuternion_.norm();
   }
 
   /*! \brief Sets unit quaternion to identity.
    *  \returns reference
    */
-  UnitQuaternion& setIdentity() {
+  UnitQuaternion & setIdentity()
+  {
     this->w() = Scalar(0.0);
     this->x() = Scalar(0.0);
     this->y() = Scalar(0.0);
@@ -483,15 +558,18 @@ class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
   /*! \brief Get identity unit quaternion.
    *  \returns identity unit quaternion
    */
-  static UnitQuaternion Identity() {
+  static UnitQuaternion Identity()
+  {
     return UnitQuaternion(Implementation::Identity());
   }
 
-  const Implementation& toImplementation() const {
+  const Implementation & toImplementation() const
+  {
     return unitQuternion_.toImplementation();
   }
 
-  Implementation& toImplementation() {
+  Implementation & toImplementation()
+  {
     return unitQuternion_.toImplementation();
   }
 
@@ -499,12 +577,13 @@ class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
    *  This function can be used to get the derivative of the concatenation with respect to the right quaternion.
    *  \returns the quaternion matrix Qleft
    */
-  Eigen::Matrix<PrimType_,4,4> getQuaternionMatrix() {
-    Eigen::Matrix<PrimType_,4,4> Qleft;
-    Qleft(0,0) =  w();      Qleft(0,1) = -x();      Qleft(0,2) = -y();      Qleft(0,3) = -z();
-    Qleft(1,0) =  x();      Qleft(1,1) =  w();      Qleft(1,2) = -z();      Qleft(1,3) =  y();
-    Qleft(2,0) =  y();      Qleft(2,1) =  z();      Qleft(2,2) =  w();      Qleft(2,3) = -x();
-    Qleft(3,0) =  z();      Qleft(3,1) = -y();      Qleft(3,2) =  x();      Qleft(3,3) =  w();
+  Eigen::Matrix<PrimType_, 4, 4> getQuaternionMatrix()
+  {
+    Eigen::Matrix<PrimType_, 4, 4> Qleft;
+    Qleft(0, 0) = w();      Qleft(0, 1) = -x();      Qleft(0, 2) = -y();      Qleft(0, 3) = -z();
+    Qleft(1, 0) = x();      Qleft(1, 1) = w();      Qleft(1, 2) = -z();      Qleft(1, 3) = y();
+    Qleft(2, 0) = y();      Qleft(2, 1) = z();      Qleft(2, 2) = w();      Qleft(2, 3) = -x();
+    Qleft(3, 0) = z();      Qleft(3, 1) = -y();      Qleft(3, 2) = x();      Qleft(3, 3) = w();
     return Qleft;
   }
 
@@ -512,12 +591,14 @@ class UnitQuaternion : public UnitQuaternionBase<UnitQuaternion<PrimType_>> {
    *  This function can be used to get the derivative of the concatenation with respect to the left quaternion.
    *  \returns the quaternion matrix Qright
    */
-  Eigen::Matrix<PrimType_,4,4> getConjugateQuaternionMatrix() {
-    Eigen::Matrix<PrimType_,4,4> Qright;
-    Qright(0,0) =  w();      Qright(0,1) = -x();      Qright(0,2) = -y();      Qright(0,3) = -z();
-    Qright(1,0) =  x();      Qright(1,1) =  w();      Qright(1,2) =  z();      Qright(1,3) = -y();
-    Qright(2,0) =  y();      Qright(2,1) = -z();      Qright(2,2) =  w();      Qright(2,3) =  x();
-    Qright(3,0) =  z();      Qright(3,1) =  y();      Qright(3,2) = -x();      Qright(3,3) =  w();
+  Eigen::Matrix<PrimType_, 4, 4> getConjugateQuaternionMatrix()
+  {
+    Eigen::Matrix<PrimType_, 4, 4> Qright;
+    Qright(0, 0) = w();      Qright(0, 1) = -x();      Qright(0, 2) = -y();
+    Qright(0, 3) = -z();
+    Qright(1, 0) = x();      Qright(1, 1) = w();      Qright(1, 2) = z();      Qright(1, 3) = -y();
+    Qright(2, 0) = y();      Qright(2, 1) = -z();      Qright(2, 2) = w();      Qright(2, 3) = x();
+    Qright(3, 0) = z();      Qright(3, 1) = y();      Qright(3, 2) = -x();      Qright(3, 3) = w();
     return Qright;
   }
 };
@@ -528,6 +609,4 @@ typedef UnitQuaternion<double> UnitQuaternionD;
 typedef UnitQuaternion<float> UnitQuaternionF;
 
 
-
 } // namespace kindr
-

@@ -24,76 +24,80 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Project configuration
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.5)
 
 project(kindr)
 
-# Check if catkin package should be built.
-if(NOT USE_CMAKE)
-  find_package(catkin QUIET)
-  message(STATUS "Setting pure CMake build to false as not specified.")
-  set(USE_CMAKE false CACHE BOOL "Choose whether to build with CMake." FORCE)
-  set_property(CACHE USE_CMAKE PROPERTY STRINGS "True" "False")
+# Options
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
 endif()
-
-if(catkin_FOUND AND NOT USE_CMAKE)
-  message(STATUS "Building kindr as a catkin package.")
-  set(BUILD_CATKIN_PACKAGE true)
-  set(BUILD_TEST false)
-else()
-  message(STATUS "Building kindr as a cmake package.")
-  set(BUILD_CATKIN_PACKAGE false)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra)
 endif()
 
 # Configure CMake.
-if(NOT BUILD_CATKIN_PACKAGE)
-  set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-endif()
+
+# set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+# set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 # Noisily default to Release build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+message(STATUS "Setting build type to 'Release' as none was specified.")
+set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+"Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-add_definitions(-std=c++11)
 
+find_package(ament_cmake REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 # Init catkin package.
-if(BUILD_CATKIN_PACKAGE)
-  catkin_package(
-    INCLUDE_DIRS
-      include
-      ${EIGEN3_INCLUDE_DIR}
-  )
-endif()
+# if(BUILD_CATKIN_PACKAGE)
+#   catkin_package(
+#     INCLUDE_DIRS
+#       include
+#       ${EIGEN3_INCLUDE_DIR}
+#   )
+# endif()
+
+
 
 include_directories(include)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-# Don't build tests if not specified.
-if(NOT BUILD_TEST)
-  message(STATUS "Setting build-tests to false as not specified.")
-  set(BUILD_TEST false CACHE BOOL "Choose whether to build tests." FORCE)
-  set_property(CACHE BUILD_TEST PROPERTY STRINGS
-    "True" "False")
-endif()
+ament_export_include_directories(include)
+ament_export_include_directories(${EIGEN3_INCLUDE_DIR})
 
-if(BUILD_TEST AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest/")
+# Don't build tests if not specified.
+# if(NOT BUILD_TEST)
+#   message(STATUS "Setting build-tests to false as not specified.")
+#   set(BUILD_TEST false CACHE BOOL "Choose whether to build tests." FORCE)
+#   set_property(CACHE BUILD_TEST PROPERTY STRINGS
+#     "True" "False")
+# endif()
+
+if(BUILD_TESTING)
 	message(STATUS "Building GTests!")
-	option(BUILD_GTEST "build gtest" ON)
-	add_subdirectory(gtest gtest)
-	enable_testing()
+  find_package(ament_cmake_gtest REQUIRED)
+  # find_package(ros_testing REQUIRED)
+	# option(BUILD_GTEST "build gtest" ON)
+	# add_subdirectory(gtest gtest)
+	# enable_testing()
+  # ament_add_gtest_executable(basic_test
+  #   test/basic_test.cpp
+  # )
+  # ament_target_dependencies(basic_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+  # Add unit tests
+  add_subdirectory(test)
 endif()
 
 install(DIRECTORY include/kindr DESTINATION include)
 
 # Add unit tests
-add_subdirectory(test)
+# add_subdirectory(test)
 
 # Add Doxygen documentation
 add_subdirectory(doc/doxygen)
@@ -157,3 +161,5 @@ if (NOT TARGET uninstall)
   add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
+
+ament_package()

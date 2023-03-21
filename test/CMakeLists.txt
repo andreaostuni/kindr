@@ -24,11 +24,19 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Project configuration
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.5)
 
-add_definitions(-std=c++11)
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 find_package(Eigen3 REQUIRED)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(ament_cmake_gtest REQUIRED)
 
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(../include)
@@ -41,27 +49,20 @@ include_directories(../include)
 # GTest
 ################################
 
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 include_directories(test)
 
 # This macro globs all tests to a list so we can run them post-build.
 macro(_add_gtest target)
 	set(sources  ${ARGV})
 	LIST(REMOVE_ITEM sources ${target})
-	if(BUILD_CATKIN_PACKAGE AND CATKIN_ENABLE_TESTING)
-		catkin_add_gtest(${target} ${sources})
+	if(BUILD_TESTING)
+		ament_add_gtest(${target} ${sources})
 		target_include_directories(${target} PRIVATE include)
-		target_link_libraries(${target} gtest_main)
 		find_package(cmake_code_coverage QUIET)
 		if(cmake_code_coverage_FOUND)
 		  add_gtest_coverage(TEST_BUILD_TARGETS ${target})
 		endif(cmake_code_coverage_FOUND)
-	elseif(BUILD_GTEST)
-		add_executable(${target} ${sources})
 		message("Building test for " ${sources})
-		set(UNIT_TEST_TARGETS ${UNIT_TEST_TARGETS} ${target})
-		target_link_libraries(${target} gtest gtest_main pthread)
-		add_test(${target} ${target})
 	endif()
 endmacro(_add_gtest)
 
@@ -83,7 +84,7 @@ set(QUATERNIONS_SRCS
 	test_main.cpp
 	quaternions/QuaternionTest.cpp
 )
-_add_gtest( runUnitTestsQuaternions ${QUATERNIONS_SRCS} )
+_add_gtest(runUnitTestsQuaternions ${QUATERNIONS_SRCS} )
 
 set(ROTATION_SRCS
 	test_main.cpp
@@ -98,7 +99,7 @@ set(ROTATION_SRCS
 	rotations/ConventionTest.cpp
 
 )
-_add_gtest( runUnitTestsRotation ${ROTATION_SRCS})
+_add_gtest(runUnitTestsRotation ${ROTATION_SRCS})
 
 
 set(ROTATIONDIFF_SRCS
@@ -111,20 +112,20 @@ set(ROTATIONDIFF_SRCS
 	rotations/EulerAnglesZyxDiffTest.cpp
 	rotations/EulerAnglesXyzDiffTest.cpp
 )
-_add_gtest( runUnitTestsRotationDiff ${ROTATIONDIFF_SRCS})
+_add_gtest(runUnitTestsRotationDiff ${ROTATIONDIFF_SRCS})
 
 set(POSITIONS_SRCS
 	test_main.cpp
 
 )
-_add_gtest( runUnitTestsPositions  ${POSITIONS_SRCS})
+_add_gtest(runUnitTestsPositions  ${POSITIONS_SRCS})
 
 set(POSES_SRCS
 	test_main.cpp
 	poses/PositionTest.cpp
 	poses/HomogeneousTransformationTest.cpp
 )
-_add_gtest( runUnitTestsPose  ${POSES_SRCS})
+_add_gtest(runUnitTestsPose  ${POSES_SRCS})
 
 set(POSESDIFF_SRCS
 	test_main.cpp
@@ -132,13 +133,13 @@ set(POSESDIFF_SRCS
 	poses/PositionDiffTest.cpp
 	poses/TwistWithAngularVelocityTest.cpp
 )
-_add_gtest( runUnitTestsPoseDiff  ${POSESDIFF_SRCS})
+_add_gtest(runUnitTestsPoseDiff  ${POSESDIFF_SRCS})
 
 set(VECTOR_SRCS
 	test_main.cpp
 	vectors/VectorsTest.cpp
 )
-_add_gtest( runUnitTestsVector  ${VECTOR_SRCS})
+_add_gtest(runUnitTestsVector  ${VECTOR_SRCS})
 
 set(PHYS_QUANT_SRCS
 	test_main.cpp
@@ -146,7 +147,11 @@ set(PHYS_QUANT_SRCS
 	phys_quant/WrenchTest.cpp
 	phys_quant/ScalarTest.cpp
 )
-_add_gtest( runUnitTestsPhysQuant  ${PHYS_QUANT_SRCS})
+_add_gtest(runUnitTestsPhysQuant  ${PHYS_QUANT_SRCS})
+
+install(TARGETS
+  ${UNIT_TEST_TARGETS}
+      DESTINATION test/${PROJECT_NAME})
 
 # Run all unit tests post-build.
 if(NOT TARGET run_tests)
